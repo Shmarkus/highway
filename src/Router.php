@@ -6,14 +6,20 @@ use CodeHouse\Highway\Annotations\RequestMapping;
 use CodeHouse\Highway\Annotations\Security;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Phroute\Phroute\HandlerResolver;
+use Phroute\Phroute\RouteCollector;
 
 class Router
 {
     /**
-     * @var \Phroute\Phroute\RouteCollector
+     * @var RouteCollector
      */
     private $routeCollector;
-    private $diContainer;
+
+    /**
+     * @var HandlerResolver
+     */
+    private $handlerResolver;
 
     /**
      * Highway constructor.
@@ -24,7 +30,8 @@ class Router
     public function __construct($pathToControllers, $controllerNamespace, $securityFilterHandler = null)
     {
         $this->registerAnnotations();
-        $this->routeCollector = new \Phroute\Phroute\RouteCollector();
+        $this->routeCollector = new RouteCollector();
+        $this->handlerResolver = new HandlerResolver();
 
         $controllers = $this->readControllers($pathToControllers);
         foreach ($controllers as $file) {
@@ -149,7 +156,8 @@ class Router
      */
     public function setDiContainer($container)
     {
-        $this->diContainer = $container;
+        $this->handlerResolver = new DIHandlerResolver();
+        $this->handlerResolver->setContainer($container);
     }
 
     /**
@@ -162,13 +170,7 @@ class Router
      */
     public function serve($httpMethod, $uri)
     {
-        if ($this->diContainer != null) {
-            $resolver = new DIHandlerResolver();
-            $resolver->setContainer($this->diContainer);
-            $dispatcher = new Dispatcher($this->routeCollector->getData(), $resolver);
-        } else {
-            $dispatcher = new Dispatcher($this->routeCollector->getData(), null);
-        }
+        $dispatcher = new Dispatcher($this->routeCollector->getData(), $this->handlerResolver);
         return $dispatcher->dispatch($httpMethod, $uri);
     }
 }

@@ -1,0 +1,22 @@
+{
+  "name": "codehouse/highway",
+  "description": "A regular expression based router with spring-stype configuration (with DI support)",
+  "type": "library",
+  "license": "GPLv3",
+  "authors": [
+    {
+      "name": "Markus Karileet",
+      "email": "markus.karileet@codehouse.ee"
+    }
+  ],
+  "minimum-stability": "stable",
+  "autoload": {
+    "psr-4": {
+      "CodeHouse\\Highway\\": "src"
+    }
+  },
+  "require": {
+    "phroute/phroute": "v2.1.0",
+    "doctrine/common": "2.*"
+  }
+}
